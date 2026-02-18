@@ -50,7 +50,7 @@ main() {
   docker_cmd+=(-it "${container_id}" /bin/bash)
   [[ -n "${COMMAND}" ]] && docker_cmd+=("-c" "${COMMAND}")
 
-  log "${docker_cmd[*]}"
+  ( IFS=' '; log "${docker_cmd[*]}" )
   "${docker_cmd[@]}"
 }
 
