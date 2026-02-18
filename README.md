@@ -23,39 +23,22 @@ You can now run certbot to get a certificate from Let's Encrypt:
 
 ```bash
 script/set-up-certbot.sh
-script/run-certbot.sh [optional arguments to certbot]
+script/run-certbot.sh -w /var/www/public -d yourdomain.com
 ```
 
 # Debugging
 
 Get a shell inside the running container:
-
 ```bash
-script/exec.sh
+script/exec.sh -u USER
 ```
 
 Run a single command inside the running container:
-
 ```bash
-script/exec.sh your-command
+script/exec.sh -u USER COMMAND
 ```
 
-# Known Issues
-
-If you're using certbot and you make a change to anything in `/etc/apache2/sites-available/` in the Docker image, you'll need to remove certbot before your changes will take effect:
-
-```bash
-script/remove-certbot.sh
-```
-
-Then you can re-run certbot (including setup) if desired:
-
-```bash
-script/set-up-certbot.sh
-script/run-certbot.sh [optional arguments to certbot]
-```
-
-Alternatively, you can manually apply the changes to the Apache configuration in `.ssl/apache-sites-available/` and then restart the server.
+Default `USER` is `root`.
 
 # Stop the production server
 
