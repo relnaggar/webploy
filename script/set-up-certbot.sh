@@ -31,7 +31,7 @@ main() {
 
   # restart the production server
   log "Restarting the production server"
-  script/run-production-server.sh
+  script/up.sh
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then

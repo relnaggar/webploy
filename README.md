@@ -11,7 +11,7 @@ script/aws-install-docker.sh # only need to run once
 ## Step 2
 
 ```bash
-script/run-production-server.sh DOCKER_IMAGE_IDENTIFIER
+script/up.sh DOCKER_IMAGE_IDENTIFIER
 ```
 Replace `DOCKER_IMAGE_IDENTIFIER` with the identifier of the image you want to deploy in the format `dockerhub_username/image_name:image_tag`. For example, `johndoe/myapp:latest`.
 
@@ -31,13 +31,13 @@ script/run-certbot.sh [optional arguments to certbot]
 Get a shell inside the running container:
 
 ```bash
-script/ssh-into-production-server.sh
+script/exec.sh
 ```
 
 Run a single command inside the running container:
 
 ```bash
-script/ssh-into-production-server.sh your-command
+script/exec.sh your-command
 ```
 
 # Known Issues

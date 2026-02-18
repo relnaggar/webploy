@@ -9,7 +9,7 @@ readonly SCRIPT_DIR
 . "${SCRIPT_DIR}/lib/utils.sh"
 
 main() {
-  script/ssh-into-production-server.sh "certbot --apache --post-hook \"\
+  script/exec.sh "certbot --apache --post-hook \"\
     chgrp -R apache2 /etc/letsencrypt/live \
     && chmod -R 750 /etc/letsencrypt/live \
     && chgrp -R apache2 /etc/letsencrypt/archive \

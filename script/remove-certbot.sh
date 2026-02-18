@@ -12,7 +12,7 @@ main() {
   logfun sudo rm -rf .ssl
   unset_env_value USE_CERTBOT
   log "Restarting the production server"
-  script/run-production-server.sh
+  script/up.sh
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
