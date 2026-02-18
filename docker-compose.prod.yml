@@ -7,6 +7,5 @@ services:
     image: "${DOCKER_IMAGE_IDENTIFIER}"
     volumes:
       - db:/var/db
-      - ./seeds:/var/seeds
 volumes:
   db:
