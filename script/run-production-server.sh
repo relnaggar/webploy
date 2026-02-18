@@ -69,6 +69,16 @@ main() {
   log "Running command: ${command}"
   eval "${command}"
 
+  # Wait for all services in the stack to reach their desired replica count
+  # before pruning, since stack deploy is asynchronous.
+  log "Waiting for stack to stabilize..."
+  while docker service ls --filter "label=com.docker.stack.namespace=prod" \
+      --format '{{.Replicas}}' \
+      | awk -F'/' '$1 != $2 { found=1 } END { exit !found }'; do
+    sleep 3
+  done
+  log "Stack stabilized"
+
   logfun docker system prune -f
   logfun docker image ls
 }
