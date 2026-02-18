@@ -23,7 +23,7 @@ You can now run certbot to get a certificate from Let's Encrypt:
 
 ```bash
 script/set-up-certbot.sh
-script/run-certbot.sh -w /var/www/public -d yourdomain.com
+script/run-certbot.sh "-w /var/www/public -d yourdomain.com"
 ```
 
 # Debugging
