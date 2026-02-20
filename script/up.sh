@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && \
   pwd)"
 readonly SCRIPT_DIR
 . "${SCRIPT_DIR}/lib/utils.sh"
+. "${SCRIPT_DIR}/lib/docker-stack.sh"
 
 usage() {
   echo "usage: ${SCRIPT_NAME} [DOCKER_IMAGE_IDENTIFIER]"
@@ -65,14 +66,21 @@ main() {
   if [[ -n "$(get_env_value USE_SECRETS)" ]]; then
     command+=" -c docker-compose.secrets.yml"
   fi
-  command+=" prod"
+  if [[ -n "$(get_env_value USE_LITESTREAM)" ]]; then
+    command+=" -c docker-compose.litestream.yml"
+    export LITESTREAM_R2_ACCOUNT_ID="$(get_env_value LITESTREAM_R2_ACCOUNT_ID)"
+    export LITESTREAM_R2_BUCKET="$(get_env_value LITESTREAM_R2_BUCKET)"
+    export LITESTREAM_ACCESS_KEY_ID="$(get_env_value LITESTREAM_ACCESS_KEY_ID)"
+    export LITESTREAM_SECRET_ACCESS_KEY="$(get_env_value LITESTREAM_SECRET_ACCESS_KEY)"
+  fi
+  command+=" ${STACK_NAME}"
   log "Running command: ${command}"
   eval "${command}"
 
   # Wait for all services in the stack to reach their desired replica count
   # before pruning, since stack deploy is asynchronous.
   log "Waiting for stack to stabilize..."
-  while docker service ls --filter "label=com.docker.stack.namespace=prod" \
+  while docker service ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" \
       --format '{{.Replicas}}' \
       | awk -F'/' '$1 != $2 { found=1 } END { exit !found }'; do
     sleep 3

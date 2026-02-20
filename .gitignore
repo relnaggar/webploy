@@ -1,6 +1,7 @@
 .env
 .ssl/
 docker-compose.secrets.yml
+litestream.yml
 db*/
 seeds/*.php*
 CLAUDE.md
