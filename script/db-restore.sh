@@ -1,8 +1,10 @@
 #!/bin/bash
 # Restore a SQLite database from its Litestream replica on Cloudflare R2.
 # Usage: script/db-restore.sh FILENAME [--timestamp RFC3339_TIMESTAMP]
-#   e.g. script/db-restore.sh app.sqlite
-#        script/db-restore.sh app.sqlite --timestamp 2026-01-15T10:30:00Z
+#   e.g. to restore the latest snapshot:
+# script/db-restore.sh app.sqlite
+#   e.g. to restore to a specific point in time (UTC):
+# script/db-restore.sh app.sqlite --timestamp 2026-01-15T10:30:00Z
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -98,6 +100,12 @@ main() {
     litestream/litestream:0.5.8 \
     restore "${restore_flags[@]}" "${replica_url}"
 
+  log "Backing up existing database to /var/db/${db_filename}.bak..."
+  logfun docker run --rm \
+    -v ${STACK_NAME}_db:/var/db \
+    busybox \
+    sh -c "[ -f /var/db/${db_filename} ] && cp /var/db/${db_filename} /var/db/${db_filename}.bak || true"
+
   log "Copying restored database into volume..."
   logfun docker run --rm \
     -v ${STACK_NAME}_db:/var/db \
@@ -106,7 +114,7 @@ main() {
     sh -c "cp /tmp/${db_filename} /var/db/${db_filename} && chown 999:999 /var/db/${db_filename}"
 
   log "Cleaning up temp file..."
-  rm -f "${tmp_path}"
+  docker run --rm -v /tmp:/tmp busybox rm -f "${tmp_path}"
 
   trap - ERR
 
