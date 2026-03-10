@@ -22,7 +22,7 @@ parse_args() {
     "$#" -gt 1 ]]; then
     usage
     exit 0
-  fi  
+  fi
 
   # defaults
   if [[ -z "${DOCKER_IMAGE_IDENTIFIER}" ]]; then
@@ -45,9 +45,14 @@ main() {
 
   # remember the image identifier for next time
   set_env_value DOCKER_IMAGE_IDENTIFIER "${DOCKER_IMAGE_IDENTIFIER}"
-  
+
   # export for docker swarm configuration in the docker-compose file
   export DOCKER_IMAGE_IDENTIFIER 
+
+  # note the currently running image ID before pulling the new one
+  local old_image_id=""
+  old_image_id=$(docker inspect "${DOCKER_IMAGE_IDENTIFIER}" \
+    --format '{{.Id}}' 2>/dev/null || true)
 
   # pull the image
   logfun docker pull "${DOCKER_IMAGE_IDENTIFIER}"
@@ -86,6 +91,20 @@ main() {
     sleep 3
   done
   log "Stack stabilized"
+
+  # Wait for containers using the old image to stop before pruning.
+  if [[ -n "${old_image_id}" ]]; then
+    local new_image_id
+    new_image_id=$(docker inspect "${DOCKER_IMAGE_IDENTIFIER}" \
+      --format '{{.Id}}' 2>/dev/null || true)
+    if [[ "${old_image_id}" != "${new_image_id}" ]]; then
+      log "Waiting for old containers to stop..."
+      while [[ -n "$(docker ps -q --filter "ancestor=${old_image_id}")" ]]; do
+        sleep 3
+      done
+      log "Old containers stopped"
+    fi
+  fi
 
   logfun docker system prune -f
   logfun docker image ls
