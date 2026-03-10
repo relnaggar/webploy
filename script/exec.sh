@@ -47,8 +47,11 @@ main() {
 
   local docker_cmd=(docker exec)
   [[ -n "${USER_FLAG}" ]] && docker_cmd+=("-u" "${USER_FLAG}")
-  docker_cmd+=(-it "${container_id}" /bin/bash)
-  [[ -n "${COMMAND}" ]] && docker_cmd+=("-c" "${COMMAND}")
+  if [[ -z "${COMMAND}" ]]; then
+    docker_cmd+=(-it "${container_id}" /bin/bash)
+  else
+    docker_cmd+=(-i "${container_id}" /bin/bash -c "${COMMAND}")
+  fi
 
   ( IFS=' '; log "${docker_cmd[*]}" )
   "${docker_cmd[@]}"
